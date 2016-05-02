@@ -2,12 +2,8 @@ function main() {
 
     var csvFilter = "*.csv",
         csvFile = File.openDialog("Please select the CSV File…", csvFilter, false),
-        docsData = [],
-        csvSep = ",",
-        csvContent,
         csvHeaders,
         s ,
-        n,
         model,
         manufacturer,
         measurement_type,
@@ -16,12 +12,11 @@ function main() {
 
     if ( !csvFile ) return;
 
-    var data = [];
     var measurement_type_to_device = {};
 
-
     csvFile.open('r');
-    csvHeaders = csvFile.readln().split(",");
+    // skip headers
+    csvFile.readln().split(",");
 
     while (!csvFile.eof){
         var device = {};
@@ -98,19 +93,19 @@ function main() {
     for (var device_type in measurement_type_to_device) {
         posTop -= 50;
         var device_group = docRef.groupItems.add();
-        device_group.name = device_type;
+        device_group.name = device_type + " group";
 
         // Type name box
         var itemRef = device_group.pathItems.rectangle(posTop, posLeft, 500, 50);
         var textRef = device_group.textFrames.areaText(itemRef);
-        textRef.contents = device_type + "(" + measurement_type_to_device[device_type].length + ")";
+        textRef.contents = device_type + " (" + measurement_type_to_device[device_type].length + ")";
 
         for (var j = 0; j < measurement_type_to_device[device_type].length; j++) {
             posTop -= 50;
 
             var current_device = measurement_type_to_device[device_type][j];
             var dev_group = device_group.groupItems.add();
-            dev_group.name = current_device.manufacturer + " " + current_device.model;
+            dev_group.name = current_device.manufacturer + " " + current_device.model + " group";
 
             // Device description box
             var itemRef1 = dev_group.pathItems.rectangle(posTop, posLeft + paddingLeft, 300, 100);
