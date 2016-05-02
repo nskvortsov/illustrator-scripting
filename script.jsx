@@ -74,6 +74,19 @@ function main() {
 
     }
 
+    // ordering
+    for (var dev_type in measurement_type_to_device) {
+        var dev_array = measurement_type_to_device[dev_type];
+        dev_array.sort(function(a,b){
+            var manufacturer_comparison = a.manufacturer.localeCompare(b.manufacturer);
+            if (manufacturer_comparison != 0) {
+                return manufacturer_comparison;
+            } else {
+                return a.model.localeCompare(b.model);
+            }
+        })
+    }
+
 
     // Rendering stuff
     var docRef;
@@ -110,7 +123,7 @@ function main() {
             // Device description box
             var itemRef1 = dev_group.pathItems.rectangle(posTop, posLeft + paddingLeft, 300, 100);
             var textRef1 = dev_group.textFrames.areaText(itemRef1);
-            textRef1.contents = dev_group.name;
+            textRef1.contents = current_device.manufacturer + " " + current_device.model;
         }
     }
 };
