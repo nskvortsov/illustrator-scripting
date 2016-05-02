@@ -1,6 +1,6 @@
 function main() {
 
-    var csvFilter = "*.csv", //  function(f) { return /\.csv$/i.test ( f.name ); },
+    var csvFilter = "*.csv",
         csvFile = File.openDialog("Please select the CSV File…", csvFilter, false),
         docsData = [],
         csvSep = ",",
@@ -25,7 +25,33 @@ function main() {
 
     while (!csvFile.eof){
         var device = {};
-        s = csvFile.readln().split(",");
+        var line = csvFile.readln();
+
+        var q = [];
+        var part = "";
+        var notInBrackets = true;
+        for (var index = 0; index < line.length; index++) {
+            var ch = line.charAt(index);
+            switch (ch)
+            {
+                case ',':
+                    if (notInBrackets) {
+                        q.push(part);
+                        part = "";
+                        notInBrackets = true;
+                    }
+                    break;
+
+                case '"':
+                    notInBrackets = !notInBrackets;
+                    break;
+
+                default: part = part + ch;
+            }
+        }
+
+        //s = line.split(",");
+        s = q;
 
         // construct the device object
         if (s.length >= 0)  {
