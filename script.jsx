@@ -1,7 +1,5 @@
 function main() {
 
-    alert(app.coordinateSystem);
-
     var csvFilter = "*.csv", //  function(f) { return /\.csv$/i.test ( f.name ); },
         csvFile = File.openDialog("Please select the CSV File…", csvFilter, false),
         docsData = [],
@@ -28,6 +26,8 @@ function main() {
     while (!csvFile.eof){
         var device = {};
         s = csvFile.readln().split(",");
+
+        // construct the device object
         if (s.length >= 0)  {
             device["model"] = s[1];
             device["manufacturer"] = s[2];
@@ -35,15 +35,13 @@ function main() {
             device["fda"] = Boolean("YES" == s[11]);
             device["ce"] = Boolean("YES" == s[12]);
         }
-        var item = device.manufacturer.concat(" ")
-            .concat(device.model)
-//            .concat(measurement_type)
-//             .concat(" FDA:")
-//             .concat(fda)
-//             .concat(" CE:").
-//             concat(ce);
-            .concat("\n");
-        data.push(item);
+
+        // types may contain garbage
+        for (var k = 0; k < device.measurement_type.length; k++) {
+            device.measurement_type[k] = device.measurement_type[k].trim();
+        }
+
+        // construct type -> device map
         for(var i = 0; i < device.measurement_type.length; i++) {
             //noinspection JSValidateTypes
             if (typeof measurement_type_to_device[device.measurement_type[i]] === 'undefined' ||
@@ -55,6 +53,8 @@ function main() {
 
     }
 
+
+    // Rendering stuff
     var docRef;
 
     if ( app.documents.length == 0 ) {
@@ -74,16 +74,19 @@ function main() {
         var device_group = docRef.groupItems.add();
         device_group.name = device_type;
 
+        // Type name box
         var itemRef = device_group.pathItems.rectangle(posTop, posLeft, 500, 50);
         var textRef = device_group.textFrames.areaText(itemRef);
-        textRef.contents = device_type;
+        textRef.contents = device_type + "(" + measurement_type_to_device[device_type].length + ")";
 
         for (var j = 0; j < measurement_type_to_device[device_type].length; j++) {
             posTop -= 50;
-            // Create a new document and add 2 area TextFrames
+
             var current_device = measurement_type_to_device[device_type][j];
             var dev_group = device_group.groupItems.add();
             dev_group.name = current_device.manufacturer + " " + current_device.model;
+
+            // Device description box
             var itemRef1 = dev_group.pathItems.rectangle(posTop, posLeft + paddingLeft, 300, 100);
             var textRef1 = dev_group.textFrames.areaText(itemRef1);
             textRef1.contents = dev_group.name;
@@ -97,6 +100,16 @@ function logObject(obj) {
         output += property + ":\n" + obj[property]+'-----------------\n';
     }
     return output;
+}
+
+if (!String.prototype.trim) {
+    (function() {
+        // Make sure we trim BOM and NBSP
+        var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+        String.prototype.trim = function() {
+            return this.replace(rtrim, '');
+        };
+    })();
 }
 
 main();
